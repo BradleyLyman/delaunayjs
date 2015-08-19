@@ -1,0 +1,6 @@
+*.swp
+.tern-project
+node_modules/
+out/
+build/
+dist/

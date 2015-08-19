@@ -1,0 +1,11 @@
+{
+  "libs": [
+  ],
+  "plugins": {
+    "node" : {},
+    "requirejs": {
+      "baseURL" : "./src",
+      "paths"   : {}
+    }
+  }
+}
