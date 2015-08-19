@@ -17,3 +17,13 @@
 module.exports.sqrLen = function(vec) {
   return vec[0]*vec[0] + vec[1]*vec[1];
 };
+
+/**
+ * Subtracts one vector from the other.
+ * @param {Vec2} a
+ * @param {Vec2} b
+ * @return {Vec2} a - b
+ **/
+module.exports.sub = function(a, b) {
+  return [a[0] - b[0], a[1] - b[1]];
+};

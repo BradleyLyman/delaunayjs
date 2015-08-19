@@ -59,6 +59,8 @@
     return new THREE.Mesh(geometry, material);
   };
 
+  var uniqueEdges = delaunay.trimEdges(rawGeometry, [0, 1]);
+
   var delaunayMesh = meshFromRawGeometry(rawGeometry);
 
   scene.add(delaunayMesh);

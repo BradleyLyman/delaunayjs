@@ -82,6 +82,7 @@ module.exports.createDelaunay = function(initialSize) {
   };
 };
 
+var calcCircumcircle =
 /**
  * Calculates the center and squared radius of the triangle's
  * circumcircle. Look at https://en.wikipedia.org/wiki/Circumscribed_circle
@@ -129,6 +130,50 @@ module.exports.calcCircumcircle = function(del, index) {
   };
 };
 
+/**
+ * Given a point, removes all triangles where the point lies within
+ * the triangle's circumcircle. Returns a list of unique edges
+ * from the triangles removed.
+ * @param {Delaunay} del - Delaunay object
+ * @param {Vec2} point - Point to be added
+ * @return {Edge[]} Array of unique edges surrounding point.
+ **/
+module.exports.trimEdges = function(del, point) {
+  var toRemove = [],
+      edges    = [];
+
+  del.triangles.forEach(function(triangle, index) {
+    var circleDesc = calcCircumcircle(del, index);
+    var r = vec2.sub(circleDesc.center, point);
+    if (vec2.sqrLen(r) < circleDesc.radSqrd) {
+      toRemove.push(index);
+      edges.push(triangle.e1(), triangle.e2(), triangle.e3());
+    }
+  });
+
+  toRemove.forEach(function(index) {
+    del.triangles.splice(index, 1);
+  });
+
+  var inSet = function(list, predicate) {
+    return list.reduce(function(total, item) {
+      return total || predicate(item);
+    }, false);
+  };
+
+  return edges.reduce(function(total, edge) {
+    var equalsThisEdge = function(otherEdge) {
+      return isEdgeEqual(otherEdge, edge);
+    };
+
+    if (inSet(total, equalsThisEdge)) {
+      return total;
+    }
+
+    total.push(edge);
+    return total;
+  }, []);
+};
 
 
 
