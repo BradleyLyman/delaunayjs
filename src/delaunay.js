@@ -5,6 +5,7 @@
  **/
 
 var vec2 = require('./vec2.js');
+var mat3 = require('./mat3.js');
 
 /**
  * Holds the required state for a delaunay triangulation.
@@ -81,7 +82,52 @@ module.exports.createDelaunay = function(initialSize) {
   };
 };
 
+/**
+ * Calculates the center and squared radius of the triangle's
+ * circumcircle. Look at https://en.wikipedia.org/wiki/Circumscribed_circle
+ * for details on implementation.
+ * @param {Delaunay} del - Delaunay object
+ * @param {Number} index - triangle index
+ * @return {Object} circle descriptor { center : vec2, radSqrd : Number }
+ **/
+module.exports.calcCircumcircle = function(del, index) {
+  var tri = del.triangles[index];
+  var A = del.points[tri.getPoints()[0]];
+  var B = del.points[tri.getPoints()[1]];
+  var C = del.points[tri.getPoints()[2]];
+  var Alen = vec2.sqrLen(A),
+      Blen = vec2.sqrLen(B),
+      Clen = vec2.sqrLen(C);
 
+  var Sx = 0.5 * mat3.det([
+    Alen, A[1], 1,
+    Blen, B[1], 1,
+    Clen, C[1], 1
+  ]);
+
+  var Sy = 0.5 * mat3.det([
+    A[0], Alen, 1,
+    B[0], Blen, 1,
+    C[0], Clen, 1
+  ]);
+
+  var a = mat3.det([
+    A[0], A[1], 1,
+    B[0], B[1], 1,
+    C[0], C[1], 1
+  ]);
+
+  var b = mat3.det([
+    A[0], A[1], Alen,
+    B[0], B[1], Blen,
+    C[0], C[1], Clen
+  ]);
+
+  return {
+    center  : [Sx/a, Sy/a],
+    radSqrd : (b/a + vec2.sqrLen([Sx, Sy])/(a*a))
+  };
+};
 
 
 
