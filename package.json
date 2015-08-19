@@ -4,7 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "webpack",
+    "dev": "webpack-dev-server --devtool eval --progress --colors --hot --content-base build",
+    "deploy": "NODE_ENV=production webpack -p --config webpack.production.config.js"
   },
   "repository": {
     "type": "git",
@@ -15,5 +18,13 @@
   "bugs": {
     "url": "https://github.com/BradLyman/delaunayjs/issues"
   },
-  "homepage": "https://github.com/BradLyman/delaunayjs#readme"
+  "homepage": "https://github.com/BradLyman/delaunayjs#readme",
+  "dependencies": {
+    "three": "^0.71.0"
+  },
+  "devDependencies": {
+    "html-webpack-plugin": "^1.6.1",
+    "webpack": "^1.11.0",
+    "webpack-dev-server": "^1.10.1"
+  }
 }

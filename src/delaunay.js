@@ -68,12 +68,11 @@ var Triangle = function(p1, p2, p3) {
  **/
 module.exports.createDelaunay = function(initialSize) {
   var angle = 3.1415 * 2 / 3;
-  var points = {
-    0     : [initialSize*Math.cos(angle*0), initialSize*Math.sin(angle*0)],
-    1     : [initialSize*Math.cos(angle*1), initialSize*Math.sin(angle*1)],
-    2     : [initialSize*Math.cos(angle*2), initialSize*Math.sin(angle*2)],
-    index : 3
-  };
+  var points = [
+    [initialSize*Math.cos(angle*0), initialSize*Math.sin(angle*0)],
+    [initialSize*Math.cos(angle*1), initialSize*Math.sin(angle*1)],
+    [initialSize*Math.cos(angle*2), initialSize*Math.sin(angle*2)]
+  ];
   var triangle = Triangle(0, 1, 2);
 
   return {
