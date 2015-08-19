@@ -13,7 +13,7 @@
 
     scene    = new THREE.Scene();
     camera   = new THREE.OrthographicCamera(sw / -2, sw / 2, sh / 2, sh / -2, 1, -1);
-    renderer = new THREE.WebGLRenderer();
+    renderer = new THREE.WebGLRenderer({ antialias : true });
     renderer.setSize(w, h);
     document.body.appendChild(renderer.domElement);
 
@@ -40,7 +40,10 @@
   }());
 
   var rawGeometry = delaunay.createDelaunay(screenSize()/2);
-  var material    = new THREE.MeshBasicMaterial({ wireframe : true });
+  var material    = new THREE.MeshBasicMaterial({
+    wireframe          : true,
+    wireframeLinewidth : 2
+  });
 
   var meshFromRawGeometry = function(rawGeometry) {
     var geometry    = new THREE.Geometry();
