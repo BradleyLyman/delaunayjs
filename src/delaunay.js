@@ -22,24 +22,42 @@ var vec2 = require('./vec2.js');
  **/
 var Edge = function(n1, n2) {
   return {
-    p1 : function() { return n1; },
-    p2 : function() { return n2; }
+    p1      : function() { return n1; },
+    p2      : function() { return n2; },
   };
+};
+
+/**
+ * Returns true if the edges contain the same point names,
+ * order does not matter.
+ * @param {Edge} e1
+ * @param {Edge} e2
+ * @return {Boolean}
+ **/
+var isEdgeEqual = function(e1, e2) {
+  return (e1.p1() === e2.p1() && e1.p2() === e2.p2()) ||
+         (e1.p2() === e2.p1() && e1.p1() === e2.p2());
 };
 
 /**
  * This function creates a triangle object which represents how the triangle's
  * points are connected via edges.
- * @param {Edge} edge1 - First edge
- * @param {Edge} edge2 - Second edge
- * @param {Edge} edge3 - Third edge
+ * @param {Number} p1
+ * @param {Number} p2
+ * @param {number} p3
  * @return {Triangle}
  **/
-var Triangle = function(edge1, edge2, edge3) {
+var Triangle = function(p1, p2, p3) {
+  var points = [p1, p2, p3];
+  var edge1  = Edge(p1, p2),
+      edge2  = Edge(p2, p3),
+      edge3  = Edge(p3, p1);
+
   return {
-    e1 : function() { return edge1; },
-    e2 : function() { return edge2; },
-    e3 : function() { return edge3; }
+    e1        : function() { return edge1; },
+    e2        : function() { return edge2; },
+    e3        : function() { return edge3; },
+    getPoints : function() { return points; }
   };
 };
 
@@ -49,7 +67,19 @@ var Triangle = function(edge1, edge2, edge3) {
  *                               supertriangle.
  **/
 module.exports.createDelaunay = function(initialSize) {
+  var angle = 3.1415 * 2 / 3;
+  var points = {
+    0     : [initialSize*Math.cos(angle*0), initialSize*Math.sin(angle*0)],
+    1     : [initialSize*Math.cos(angle*1), initialSize*Math.sin(angle*1)],
+    2     : [initialSize*Math.cos(angle*2), initialSize*Math.sin(angle*2)],
+    index : 3
+  };
+  var triangle = Triangle(0, 1, 2);
 
+  return {
+    points    : points,
+    triangles : [triangle]
+  };
 };
 
 
