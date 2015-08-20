@@ -1,7 +1,9 @@
 (function() {
-  var THREE      = require('three');
-  var delaunay   = require('./../src/delaunay.js');
-  var screenSize = function() { return 20; };
+  var THREE       = require('three');
+  var delaunay    = require('./../src/delaunay.js');
+  var screenSize  = function() { return 20; };
+  var screenWidth = screenSize();
+  var rendererHeight = 1, rendererWidth = 1;
 
   var scene, camera, renederer;
   (function() {
@@ -28,7 +30,12 @@
       camera.top  = sh / 2;  camera.bottom = sh / -2;
       camera.updateProjectionMatrix();
       renderer.setSize(w, h);
+
+      screenWidth = sw;
+      rendererWidth = w;
+      rendererHeight = h;
     };
+    resize();
 
     window.onresize = (function() {
       var timestamp = 0;
@@ -39,7 +46,7 @@
     }());
   }());
 
-  var rawGeometry = delaunay.createDelaunay(screenSize()/2);
+  var rawGeometry = delaunay.createDelaunay(screenSize()*4);
   var material    = new THREE.MeshBasicMaterial({
     wireframe          : true,
     wireframeLinewidth : 2
@@ -51,20 +58,44 @@
       geometry.vertices.push(new THREE.Vector3(point[0], point[1], 0));
     });
 
+    var isEdgePiece = function(a) { return a === 0 || a === 1 || a === 2; };
+
     rawGeometry.triangles.forEach(function(triangle) {
       var p = triangle.getPoints();
+      if (isEdgePiece(p[0]) || isEdgePiece(p[1]) || isEdgePiece(p[2])) {
+        return;
+      }
       geometry.faces.push(new THREE.Face3(p[0], p[1], p[2]));
     });
 
     return new THREE.Mesh(geometry, material);
   };
 
-  var uniqueEdges = delaunay.trimEdges(rawGeometry, [0, 1]);
+  var uniqueEdges = delaunay.trimEdges(rawGeometry, [-3, -3]);
+  delaunay.finalizeTriangulation(rawGeometry, uniqueEdges, [-3, -3]);
+
+  uniqueEdges = delaunay.trimEdges(rawGeometry, [3, -3]);
+  delaunay.finalizeTriangulation(rawGeometry, uniqueEdges, [3, -3]);
+
+  uniqueEdges = delaunay.trimEdges(rawGeometry, [0, 3]);
+  delaunay.finalizeTriangulation(rawGeometry, uniqueEdges, [0, 3]);
 
   var delaunayMesh = meshFromRawGeometry(rawGeometry);
 
   scene.add(delaunayMesh);
   // scene.remove(delaunayMesh);
+
+  document.getElementsByTagName('canvas')[0].onclick = function(event) {
+    var x = (event.x / rendererWidth - 0.5) * screenWidth;
+    var y = (0.5 - event.y / rendererHeight) * screenSize();
+
+    var edges = delaunay.trimEdges(rawGeometry, [x, y]);
+    delaunay.finalizeTriangulation(rawGeometry, edges, [x, y]);
+
+    scene.remove(delaunayMesh);
+    delaunayMesh = meshFromRawGeometry(rawGeometry);
+    scene.add(delaunayMesh);
+  };
 
   var update = function() {
     renderer.render(scene, camera);

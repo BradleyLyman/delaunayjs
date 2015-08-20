@@ -139,40 +139,52 @@ module.exports.calcCircumcircle = function(del, index) {
  * @return {Edge[]} Array of unique edges surrounding point.
  **/
 module.exports.trimEdges = function(del, point) {
-  var toRemove = [],
-      edges    = [];
+  var edges = [];
 
-  del.triangles.forEach(function(triangle, index) {
+  del.triangles = del.triangles.filter(function(triangle, index) {
     var circleDesc = calcCircumcircle(del, index);
     var r = vec2.sub(circleDesc.center, point);
     if (vec2.sqrLen(r) < circleDesc.radSqrd) {
-      toRemove.push(index);
       edges.push(triangle.e1(), triangle.e2(), triangle.e3());
+      return false;
     }
-  });
-
-  toRemove.forEach(function(index) {
-    del.triangles.splice(index, 1);
+    return true;
   });
 
   var inSet = function(list, predicate) {
     return list.reduce(function(total, item) {
-      return total || predicate(item);
-    }, false);
+      return total + predicate(item);
+    }, 0);
   };
 
-  return edges.reduce(function(total, edge) {
+  return edges.filter(function(edge) {
     var equalsThisEdge = function(otherEdge) {
       return isEdgeEqual(otherEdge, edge);
     };
 
-    if (inSet(total, equalsThisEdge)) {
-      return total;
+    if (inSet(edges, equalsThisEdge) > 1) {
+      return false;
     }
 
-    total.push(edge);
-    return total;
-  }, []);
+    return true;
+  });
+};
+
+/**
+ * Uses the edges returned by trimEdges to create a new triangulation
+ * for the point given.
+ * @param {Delaunay} del - Delaunay triangulation object.
+ * @param {Edge[]} edges - Set of edges returned by trimEdges.
+ * @param {Vec2} point - Point to add to the delaunay triangluation.
+ **/
+module.exports.finalizeTriangulation = function(del, edges, point) {
+  var n = del.points.push(point) - 1;
+
+  edges.forEach(function(edge) {
+    del.triangles.push(Triangle(
+      n, edge.p1(), edge.p2()
+    ));
+  });
 };
 
 
